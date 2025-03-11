@@ -9,6 +9,7 @@ lower =
 upper = 
 */ 
 
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 class Q12{
@@ -36,7 +37,11 @@ class Q12{
         Scanner sc = new Scanner(System.in);
         String s = sc.nextLine();
         while(!s.equals("FIM")){
-            if(valido(s)) System.out.println("SIM"); else System.out.println("NÃO");
+            if(valido(s)) System.out.println("SIM"); 
+            else {
+            String nao = new String(new byte[]{0x4E, (byte) 0xC3, (byte) 0x83,  0x4F}, StandardCharsets.UTF_8);
+            System.out.println(nao); 
+        }
             s = sc.nextLine();
         }
         sc.close();

@@ -11,8 +11,7 @@ public class Q19 {
     public static int and(String s, int i, int total, boolean primeiro, int A, int B, int C){
         if (i == s.length()) return total;
         if(s.charAt(i) == 'A'){
-            if(primeiro) return and(s, i + 1, A, false, A, B, C);
-            else return and(s, i + 1, total * A, false, A, B, C); 
+            return primeiro ? and(s, i + 1, A, false, A, B, C) : and(s, i + 1, total * A, false, A, B, C); 
         }
         if(s.charAt(i) == 'B'){
             if(primeiro) return and(s, i + 1, B, false, A, B, C);
