@@ -1,26 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 
-int main(void){
+int main(void) {
     FILE *fptr;
-    fptr = fopen("arquivo.txt", "wb");   
-    int n;
-    scanf("%d", &n);
-    for(int i = 0; i < n; i++){
-        double a;
-        scanf("%lf\n", &a);
-        fprintf(fptr, "%lf\n", a);
+    int tamanho;
+    double n;
+    fptr = fopen("file.txt", "wb");
+    scanf("%d", &tamanho);
+    for (int i = 0; i < tamanho; i++) {
+        scanf("%lf", &n);  
+        fwrite(&n, sizeof(double), 1, fptr);  
+    }
+    fclose(fptr);  
+    fptr = fopen("file.txt", "rb");
+    for (int i = tamanho - 1; i >= 0; i--) {
+        double num;
+        long int x = (long int)(sizeof(double) * i); 
+        fseek(fptr, x, SEEK_SET);  
+        fread(&num, sizeof(double), 1, fptr); 
+        printf("%.6g\n", num);  
     }
     fclose(fptr);
-    
-    fptr = fopen("arquivo.txt", "rb");
-    for(int i = 0; i < n; i++){
-        double a;
-        fseek(fptr,  , SEEK_SET);
-        fscanf(fptr, "%lf", &a);
-        if(a ==(int) a) printf("%d\n",(int) a);
-        else printf("%.3f\n", a);
-        }
-        fclose(fptr);
-    }
+}
