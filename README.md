@@ -1,1 +1,2 @@
 Programas feitos por Davi Wenzel durante a cursagem da matéria Algoritmos e Estruturas de Dados 2 no primeiro semestre de 2025 na PUC Minas.
+Enunciados do Trabalho Prático 2 estão incluidos como comentários dentro de suas respectivas questões.
