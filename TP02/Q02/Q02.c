@@ -1,0 +1,3 @@
+/*
+Repita a anterior criando o registro shows na linguagem C.
+*/
