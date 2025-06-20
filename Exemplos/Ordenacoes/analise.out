@@ -1,0 +1,36 @@
+Tamanho do vetor: 100
+selectionsort 100 = 4950 comparações, 288 movimentações
+Time: 8717 µs
+insertionsort 100 = 99 comparações, 2624 movimentações
+Time: 318 µs
+bubblesort 100 = 4950 comparações, 7848 movimentações
+Time: 537 µs
+quicksort 100 = 618 comparações, 1017 movimentações
+Time: 59 µs
+Tamanho do vetor: 1000
+selectionsort 1000 = 499500 comparações, 2973 movimentações
+Time: 4544 µs
+insertionsort 1000 = 999 comparações, 245344 movimentações
+Time: 3794 µs
+bubblesort 1000 = 499500 comparações, 749571 movimentações
+Time: 8094 µs
+quicksort 1000 = 11150 comparações, 21738 movimentações
+Time: 519 µs
+Tamanho do vetor: 10000
+selectionsort 10000 = 49995000 comparações, 29958 movimentações
+Time: 50222 µs
+insertionsort 10000 = 9999 comparações, 25142132 movimentações
+Time: 26094 µs
+bubblesort 10000 = 49995000 comparações, 74663601 movimentações
+Time: 114953 µs
+quicksort 10000 = 155454 comparações, 267603 movimentações
+Time: 890 µs
+Tamanho do vetor: 100000
+selectionsort 100000 = 4999950000 comparações, 299955 movimentações
+Time: 1991586 µs
+insertionsort 100000 = 99999 comparações, 2507529524 movimentações
+Time: 2017980 µs
+bubblesort 100000 = 4999950000 comparações, 7493834487 movimentações
+Time: 14483944 µs
+quicksort 100000 = 1981523 comparações, 3040242 movimentações
+Time: 7583 µs

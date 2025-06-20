@@ -1,6 +1,8 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define MAX_LINE 1024
 #define MAX_FIELDS 12
@@ -42,37 +44,14 @@ char** split(char* str, char* delim, int* count) {
   char* token = strtok(tmp, delim);
   char** result = malloc(sizeof(char*) * 50);
   int i = 0;
-
   while (token != NULL) {
     while (*token == ' ') token++;
     result[i++] = strdup(token);
     token = strtok(NULL, delim);
   }
-
   *count = i;
   free(tmp);
   return result;
-}
-
-void sort(char** arr, int n) {
-  for (int i = 0; i < n - 1; i++) {
-    for (int j = 0; j < n - i - 1; j++) {
-      if (strcmp(arr[j], arr[j + 1]) > 0) {
-        char* tmp = arr[j];
-        arr[j] = arr[j + 1];
-        arr[j + 1] = tmp;
-      }
-    }
-  }
-}
-
-void printArray(char** arr, int n) {
-  printf("[");
-  for (int i = 0; i < n; i++) {
-    printf("%s", arr[i]);
-    if (i < n - 1) printf(", ");
-  }
-  printf("]");
 }
 
 void parseCSVLine(char* line, char* parts[]) {
@@ -95,7 +74,6 @@ void parseCSVLine(char* line, char* parts[]) {
   parts[k++] = strdup(buffer);
 }
 
-
 void setShow(Show* show, char* parts[]) {
   show->id         = isEmpty(parts[0]) ? strdup("NaN") : strdup(parts[0]);
   show->type       = isEmpty(parts[1]) ? strdup("NaN") : strdup(parts[1]);
@@ -108,7 +86,6 @@ void setShow(Show* show, char* parts[]) {
     show->cast_size = 1;
   } else {
     show->cast = split(parts[4], ",", &show->cast_size);
-    sort(show->cast, show->cast_size);
   }
 
   show->country    = isEmpty(parts[5]) ? strdup("NaN") : strdup(parts[5]);
@@ -128,69 +105,91 @@ void setShow(Show* show, char* parts[]) {
   show->description = isEmpty(parts[11]) ? strdup("NaN") : strdup(parts[11]);
 }
 
-void printShow(Show* show) {
-  printf("=> %s ## %s ## %s ## %s ## ", show->id, show->title, show->type, show->director);
-  printArray(show->cast, show->cast_size);
-  printf(" ## %s ## %s ## %d ## %s ## %s ## ", 
-         show->country, show->date_added, show->release_year, show->rating, show->duration);
-  printArray(show->listed_in, show->listed_in_size);
-  printf(" ##\n");
+int compareTitle(const void* a, const void* b) {
+  Show* s1 = *(Show**)a;
+  Show* s2 = *(Show**)b;
+  return strcmp(s1->title, s2->title);
+}
+
+int binarySearch(Show** arr, int n, const char* key, int* comparisons) {
+  int low = 0, high = n - 1;
+  while (low <= high) {
+    (*comparisons)++;
+    int mid = (low + high) / 2;
+    int cmp = strcmp(arr[mid]->title, key);
+    if (cmp == 0) return mid;
+    else if (cmp < 0) low = mid + 1;
+    else high = mid - 1;
+  }
+  return -1;
 }
 
 int main() {
-  FILE *f = fopen("/tmp/disneyplus.csv", "r");
-  if (f == NULL) {
-    return -1;
-  }
+  FILE* f = fopen("/tmp/disneyplus.csv", "r");
+  if (!f) return -1;
 
   char line[MAX_LINE];
-  Show* shows[MAX_SHOWS];
-  int count = 0;
+  Show* allShows[MAX_SHOWS];
+  int totalCount = 0;
 
-  fgets(line, sizeof(line), f);
-
-  while (fgets(line, sizeof(line), f) && count < MAX_SHOWS) {
+  fgets(line, sizeof(line), f); 
+  while (fgets(line, sizeof(line), f) && totalCount < MAX_SHOWS) {
     trim(line);
     char* parts[MAX_FIELDS];
     parseCSVLine(line, parts);
 
-    shows[count] = malloc(sizeof(Show));
-    setShow(shows[count], parts);
-
-    for (int i = 0; i < MAX_FIELDS; i++) free(parts[i]); // frezzaria
-    count++;
+    allShows[totalCount] = malloc(sizeof(Show));
+    setShow(allShows[totalCount], parts);
+    for (int i = 0; i < MAX_FIELDS; i++) free(parts[i]);
+    totalCount++;
   }
+  fclose(f);
 
-  char inputId[100];
-  while (fgets(inputId, sizeof(inputId), stdin)) {
-    trim(inputId);
+  char input[256];
+  Show* selected[MAX_SHOWS];
+  int count = 0;
 
-    if (strcmp(inputId, "FIM") == 0) break;
+  while (fgets(input, sizeof(input), stdin)) {
+    trim(input);
+    if (strcmp(input, "FIM") == 0) break;
 
-    for (int i = 0; i < count; i++) {
-      if (strcmp(shows[i]->id, inputId) == 0) {
-        printShow(shows[i]);
+    for (int i = 0; i < totalCount; i++) {
+      if (strcmp(allShows[i]->id, input) == 0) {
+        selected[count++] = allShows[i];
         break;
       }
     }
   }
-  for (int i = 0; i < count; i++) {
-    free(shows[i]->id);
-    free(shows[i]->type);
-    free(shows[i]->title);
-    free(shows[i]->director);
-    for (int j = 0; j < shows[i]->cast_size; j++) free(shows[i]->cast[j]);
-    free(shows[i]->cast);
-    free(shows[i]->country);
-    free(shows[i]->date_added);
-    free(shows[i]->rating);
-    free(shows[i]->duration);
-    for (int j = 0; j < shows[i]->listed_in_size; j++) free(shows[i]->listed_in[j]);
-    free(shows[i]->listed_in);
-    free(shows[i]->description);
-    free(shows[i]);
+  qsort(selected, count, sizeof(Show*), compareTitle);
+
+  int comparisons = 0;
+  clock_t start = clock();
+
+  while (fgets(input, sizeof(input), stdin)) {
+    trim(input);
+    if (strcmp(input, "FIM") == 0) break;
+
+    int idx = binarySearch(selected, count, input, &comparisons);
+    printf("%s\n", (idx != -1) ? "SIM" : "NAO");
   }
 
-  fclose(f);
+  clock_t end = clock();
+  double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
+
+  FILE* log = fopen("857268_binaria.txt", "w"); 
+  fprintf(log, "857268\t%lf\t%d\n", time_spent, comparisons);
+  fclose(log);
+
+  for (int i = 0; i < totalCount; i++) {
+    free(allShows[i]->id); free(allShows[i]->type); free(allShows[i]->title); free(allShows[i]->director);
+    for (int j = 0; j < allShows[i]->cast_size; j++) free(allShows[i]->cast[j]);
+    free(allShows[i]->cast);
+    free(allShows[i]->country); free(allShows[i]->date_added);
+    free(allShows[i]->rating); free(allShows[i]->duration);
+    for (int j = 0; j < allShows[i]->listed_in_size; j++) free(allShows[i]->listed_in[j]);
+    free(allShows[i]->listed_in);
+    free(allShows[i]->description); free(allShows[i]);
+  }
+
   return 0;
 }
